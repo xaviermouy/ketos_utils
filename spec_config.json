@@ -1,0 +1,18 @@
+{
+	"spectrogram": {
+		"rate": "4000 Hz",
+		"window": "0.064 s",
+		"step": "0.00125 s",
+		"freq_min": "0 Hz",
+		"freq_max": "1700 Hz",
+		"window_func": "blackman",
+		"duration": "0.4 s",
+		"type": "MagSpectrogram",
+		"transforms": [
+			{"name": "reduce_tonal_noise", "method": "RUNNING_MEAN","time_constant": 5},
+			{"name": "crop", "start": 0.0, "end": 0.5},
+			{"name": "normalize", "mean": 0.0, "std": 1.0}
+		]
+    }
+}
+

@@ -1,0 +1,25 @@
+
+** First time setting up **
+screen
+module load python/3.9
+python3 -m venv ketos-env
+source ketos-env/bin/activate
+pip install ketos
+pip install ecosound
+
+** Start run **
+screen -S ketos-run
+source ketos-env/bin/activate
+
+python3 ./run_ketos_detector.py --audio_folder=/net/stellwagen/ACOUSTIC_DATA/BOTTOM_MOUNTED/NEFSC_MA-RI/NEFSC_MA-RI_202103_NS01/5419_48kHz_UTC --extension=.wav --channel=1 --deployment_file=/net/stellwagen/STAFF/Xavier/minke_detector/NEFSC_MA-RI_NS01/NEFSC_MA-RI_202103_NS01/deployment_info.csv --output_folder=/net/stellwagen/STAFF/Xavier/minke_detector/NEFSC_MA-RI_NS01/NEFSC_MA-RI_202103_NS01 --model=./models/minke/ketos_model.kt --threshold=0.5 --step_size=0.5 --win_len=5 --with_group --with_merge
+
+
+**
+screen -ls       : list screen sessions
+screen -r        : reattach session
+screen -D <name> : Detach session with ID <name>
+Ctrl-a Ctrl-d    : detach session
+Ctrl-a k         : kill current session
+pkill screen     : kill all screen sessions
+
+
