@@ -1,29 +1,20 @@
-"""
-Ketos detector
+""" This scripts transforms a Ketos (binary) classifier model into a detector capable of 
+    processing continuous audio data and outputting a list of detections.
 
-This script runs a Ketos (binary) classifier model on continous acoustic data.
+    The audio data is processed by sliding a window across the audio data, 
+    using a user-specified step size. At each step, the audio segment contained 
+    within the window is passed on to the model for classification.
 
-Usage:
-    The script is executed in the terminal with the following command:
+    A number of options are available for modifying the behaviour of the detector, 
+    including post-processing of the classification scores reported by the model.
+
+    The script is executed in the terminal with the following command,
+
         python detector.py --model <path_to_saved_model> --audio_folder <path_to_data_folder>
+    
+    To see the full list of command lines arguments, type
 
-    To see the full list of command lines arguments, type:
         python detector.py --help
-
-Outputs:
-    - NetCDF4 (.nc) files with detection results that can be read with the
-      library ecosound. There is one .nc file for each audio file processed.
-    - Raven Annotation Table (.txt) file with detection results that can be
-      visualized with the software Raven. There is one .txt file for each audio
-      file processed.
-    - SQLite database file (.sql) with detection results for all the files
-      processed. The .sqlite file can be opened using ecosound or SQLiteStudio.
-    - errors_log.txt: Log of errors that occured during the processing. This
-      file stays empty if there is no errors.
-    - full_log.txt: Log contaning, the input parameters used, the files that
-      were processed, the computing time, and the number of detections per file
-
-@author: Xavier Mouy (xavier.mouy@noaa.gov)
 """
 
 import os
@@ -43,7 +34,6 @@ from ecosound.core.annotation import Annotation
 import os
 import soundfile as sf
 import ecosound.core.tools
-from ecosound.core.audiotools import Sound
 import numpy as np
 import scipy
 from datetime import datetime
@@ -98,19 +88,35 @@ def decimate(
     channel=1,
 ):
 
-    # init audio file
-    audio_data = Sound(infile)
-    # load audio data
-    audio_data.read(channel=channel - 1, detrend=True)
-    # decimate
-    audio_data.decimate(sampling_rate_hz)
-    # detrend
-    audio_data.detrend()
-    # normalize
-    audio_data.normalize()
-    # write new file
+    # read data
+    sig, fs = sf.read(infile, always_2d=True)
+    # select channel
+    sig = sig[:, channel - 1]
+    # downsample to user-defined sampling rate
+    downsampling_factor = int(np.round(fs / sampling_rate_hz))
+    sig_decimated = scipy.signal.decimate(
+        sig,
+        downsampling_factor,
+        n=filter_order,
+        ftype=filter_type,
+        axis=0,
+        zero_phase=True,
+    )
+    # normalize for zero mean and max = 1
+    sig_decimated = sig_decimated - np.mean(sig_decimated)
+    sig_decimated = sig_decimated / np.max(sig_decimated)
+    # save decimated file
     outfilename = os.path.basename(os.path.splitext(infile)[0]) + ".wav"
-    audio_data.write(os.path.join(out_dir, outfilename))
+    sf.write(
+        os.path.join(out_dir, outfilename),
+        sig_decimated,
+        int(np.round(fs / downsampling_factor)),
+        subtype="PCM_24",
+        endian=None,
+        format=None,
+        closefd=True,
+    )
+
     return outfilename
 
 
@@ -152,7 +158,7 @@ parser.add_argument(
 parser.add_argument(
     "--num_segs",
     type=int,
-    default=128,  # 128
+    default=128,
     help="the number of segment to hold in memory at one time",
 )
 parser.add_argument(
@@ -197,7 +203,6 @@ parser.add_argument(
     default=None,
     help="deployment_info.csv with metadata.",
 )
-
 
 show_progress_parser = parser.add_mutually_exclusive_group(required=False)
 show_progress_parser.add_argument(
@@ -284,7 +289,6 @@ for idx, file in enumerate(files):
             path=args.tmp_dir_audio,
             filename=[temp_file_name],
             repres=spec_config,
-            # representation_params=spec_config,
         )
         # process the audio data
         detections = process(
@@ -383,23 +387,11 @@ for idx, file in enumerate(files):
                 name="detections", con=conn, if_exists="append", index=False
             )
             conn.close()
-        else:
-            # No detection but still writes empty output files
-            annot = Annotation()
-            # save output to Raven
-            annot.to_raven(
-                args.output_folder,
-                os.path.splitext(file)[0]
-                + ".chan"
-                + str(args.channel)
-                + ".Table.1.selections.txt",
-                single_file=False,
-            )
-            # save output to NetCDF
-            annot.to_netcdf(os.path.splitext(file)[0])
+
         proc_time_file = time.time() - start_time
         logger.info("--- Executed in %0.4f seconds ---" % (proc_time_file))
         print(f"Executed in {proc_time_file:0.4f} seconds")
+
         # delete temporary file
         os.remove(os.path.join(args.tmp_dir_audio, temp_file_name))
 

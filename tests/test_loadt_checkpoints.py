@@ -12,11 +12,11 @@ from ketos.data_handling.data_feeding import BatchGenerator
 import ketos.data_handling.database_interface as dbi
 import os
 
-db_file = r"D:\Detector\ketos\spectro-0.4s_fft-0.064_step-0.00125_fmin-0_fmax-1700\database.h5"
-recipe_file = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\fish_bc\FS-400ms-bs256-ep50-norm\recipe.json"
-checkpoint_dir = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\fish_bc\FS-400ms-bs256-ep50-norm"
-out_dir = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\test"
-spec_config_file = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\fish_bc\FS-400ms-bs256-ep50-norm\spec_config.json"
+db_file = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20220401T140308\databases\spectro-5s_fft-0.128_step-0.064_fmin-0_fmax-800\database.h5"
+recipe_file = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20220401T140308\databases\spectro-5s_fft-0.128_step-0.064_fmin-0_fmax-800\models\recipe.json"
+checkpoint_dir = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20220401T140308\databases\spectro-5s_fft-0.128_step-0.064_fmin-0_fmax-800\models\5s"
+out_dir = r"C:\Users\xavier.mouy\Desktop\new_MW_model_from_ckpoint"
+spec_config_file = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20220401T140308\databases\spectro-5s_fft-0.128_step-0.064_fmin-0_fmax-800\spec_config.json"
 batch_size = 16
 
 
