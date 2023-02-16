@@ -19,79 +19,75 @@ from ketos.audio.spectrogram import MagSpectrogram
 
 
 # # Input parameters #################################################################
-# params = dict()
-# params[
-#     "train_annot_file"
-# ] = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\minke\20220401T140308\train.csv"
-# params[
-#     "test_annot_file"
-# ] = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\minke\20220401T140308\test.csv"
-
-# params[
-#     "data_train_dir"
-# ] = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\minke\20220401T140308\train_data"
-# params[
-#     "data_test_dir"
-# ] = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\minke\20220401T140308\test_data"
-# params[
-#     "out_dir"
-# ] = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\minke\20220401T140308\ketos_databases\spectro-20s_fft-0.128_step-0.064_fmin-0_fmax-800"
-#
-# params['positive_labels'] = ['MW']
-# params['negative_labels'] = ['HK', 'NN', 'HKPT', 'HKP', 'NNS', 'HB']
-
-
-# params["class_labels"] = []
-# params["class_labels"].append(
-#     ["HK", "NN", "HKPT", "HKP", "NNS", "HB"]
-# )  # class 0
-# params["class_labels"].append(["MW"])  # class 1
-
-# params["classif_window_sec"] = 20.0  # segemnt duration in sec for the CNN
-# params[
-#     "aug_win_step_sec"
-# ] = 3.0  # step between consecutive windows in sec (0: no augmentation)
-# params[
-#     "aug_min_annot_ovlp"
-# ] = 0.75  # windows must contain at least x% of the annotation
-# params[
-#     "spectro_config_file"
-# ] = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\minke\20220401T140308\ketos_databases\spectro-20s_fft-0.128_step-0.064_fmin-0_fmax-800\spec_config.json"
-
 
 params = dict()
 params[
     "train_annot_file"
-] = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\fish_bc\20221028T154731\train.csv"
+] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\train.csv"
 params[
     "test_annot_file"
-] = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\fish_bc\20221028T154731\test.csv"
+] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\test.csv"
 
 params[
     "data_train_dir"
-] = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\fish_bc\20221028T154731\train_data"
+] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\train_data"
 params[
     "data_test_dir"
-] = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\fish_bc\20221028T154731\test_data"
+] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\test_data"
 params[
     "out_dir"
-] = r"D:\Detector\ketos\spectro-0.4s_fft-0.064_step-0.00125_fmin-0_fmax-1700_denoised"
+] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\databases\spectro-2s_fft-0.256_step-0.03_fmin-0_fmax-800_no-norm"
 params[
     "spectro_config_file"
-] = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\fish_bc\20221028T154731\databases\spectro-0.4s_fft-0.064_step-0.00125_fmin-0_fmax-1700_denoised\spec_config.json"
+] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\databases\spectro-2s_fft-0.256_step-0.03_fmin-0_fmax-800_no-norm\spec_config.json"
 
 
 params["class_labels"] = []
-params["class_labels"].append(["NN"])  # class 0
-params["class_labels"].append(["FS"])  # class 1
+params["class_labels"].append(
+    ["NN", "HB", "HK", "HKP", "NNS", "HKPT"]
+)  # class 0
+params["class_labels"].append(["MW"])  # class 1
 
 # segemnt duration in sec for the CNN:
-params["classif_window_sec"] = 10  # 0.4
+params["classif_window_sec"] = 2  # 0.4
 # step between consecutive windows in sec (0: no augmentation):
-params["aug_win_step_sec"] = 0.05
+params["aug_win_step_sec"] = 2
 # windows must contain at least x% of the annotation:
-params["aug_min_annot_ovlp"] = 0.75
+params["aug_min_annot_ovlp"] = 1
 
+
+# params = dict()
+# params[
+#     "train_annot_file"
+# ] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\train.csv"
+# params[
+#     "test_annot_file"
+# ] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\test.csv"
+
+# params[
+#     "data_train_dir"
+# ] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\train_data"
+# params[
+#     "data_test_dir"
+# ] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\test_data"
+# params[
+#     "out_dir"
+# ] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\databases\spectro-0.2s_fft-0.128_step-0.005_fmin-0_fmax-800_no-norm"
+# params[
+#     "spectro_config_file"
+# ] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\databases\spectro-0.2s_fft-0.128_step-0.005_fmin-0_fmax-800_no-norm\spec_config.json"
+
+
+# params["class_labels"] = []
+# params["class_labels"].append(["NN","HS","KW"])  # class 0
+# params["class_labels"].append(["FS"])  # class 1
+
+# # segemnt duration in sec for the CNN:
+# params["classif_window_sec"] = 0.2
+# # step between consecutive windows in sec (0: no augmentation):
+# params["aug_win_step_sec"] = 0.05
+# # windows must contain at least x% of the annotation:
+# params["aug_min_annot_ovlp"] = 0.9
 
 ## ############################################################################
 
@@ -152,7 +148,7 @@ print("Train set:")
 ID_list = []
 for cl_id, cl_labels in enumerate(params["class_labels"]):
     pattern = "|".join(cl_labels)
-    annot_train["label"][annot_train.class_ID.str.contains(pattern)] = int(
+    annot_train["label"][annot_train.class_ID.str.fullmatch(pattern)] = int(
         cl_id
     )
     ID_list.append(int(cl_id))
@@ -174,7 +170,9 @@ print("Test set:")
 ID_list = []
 for cl_id, cl_labels in enumerate(params["class_labels"]):
     pattern = "|".join(cl_labels)
-    annot_test["label"][annot_test.class_ID.str.contains(pattern)] = int(cl_id)
+    annot_test["label"][annot_test.class_ID.str.fullmatch(pattern)] = int(
+        cl_id
+    )
     ID_list.append(int(cl_id))
     print("- Class ID: ", str(cl_id))
     print("   - Labels: ", cl_labels)
@@ -213,6 +211,7 @@ std_annot_train = sl.standardize(
     table=annot_train,
     mapper=map_to_ketos_annot_std,
     trim_table=True,
+    labels = ID_list,
     start_labels_at_1=False,
 )
 print(" ")
@@ -225,6 +224,7 @@ std_annot_test = sl.standardize(
     table=annot_test,
     mapper=map_to_ketos_annot_std,
     trim_table=True,
+    labels = ID_list,
     start_labels_at_1=False,
 )
 print(

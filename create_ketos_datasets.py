@@ -19,6 +19,8 @@ This script prepares audio and annotation data for creating a ketos database
 """
 
 from ecosound.core.annotation import Annotation
+from ecosound.core.measurement import Measurement
+
 from ecosound.core.audiotools import Sound
 import soundfile as sf
 from datetime import datetime
@@ -46,14 +48,13 @@ def decimate(train_file, train_dir, params):
     audio_data.write(os.path.join(train_dir, outfilename))
 
 
+## ############################################################################
 params = dict()
 params[
     "dataset_file_path"
-] = r"C:\Users\xavier.mouy\Documents\GitHub\fish_detector_bc\Master_annotations_dataset_20221028_without_06-MILL-FS.nc"
-params[
-    "out_dir"
-] = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\fish_bc"
-params["group_timeframe"] = "H"
+] = r"D:\NOAA\2022_BC_fish_detector\manual_annotations\Annotations_dataset_FS-NN-UN-HS-KW_20230202T135354_withSNRgt2dB.nc"
+params["out_dir"] = r"D:\NOAA\2022_BC_fish_detector\ketos"
+params["group_timeframe"] = "1H"
 params["train_ratio"] = 0.75
 
 params["sanpling_rate_hz"] = 4000
@@ -63,8 +64,12 @@ params["filter_order"] = 8
 # if True, startifies using [label_class + label_subclass]
 params["use_subclass_label"] = False
 
+## ############################################################################
+
 # create output folders for this dataset
-current_dir_name = datetime.strftime(datetime.now(), "%Y%m%dT%H%M%S")
+current_dir_name = "dataset_" + datetime.strftime(
+    datetime.now(), "%Y%m%dT%H%M%S"
+)
 current_out_dir = os.path.join(params["out_dir"], current_dir_name)
 os.mkdir(current_out_dir)
 # current_out_dir = params['out_dir']
@@ -78,6 +83,7 @@ log_file.close()
 
 # Load dataset
 dataset = Annotation()
+# dataset = Measurement()
 dataset.from_netcdf(params["dataset_file_path"])
 if params["use_subclass_label"]:
     dataset.data["label"] = (
@@ -85,6 +91,13 @@ if params["use_subclass_label"]:
     )
 else:
     dataset.data["label"] = dataset.data["label_class"]
+
+
+# # filter
+# print("d")
+# dataset.filter("(label_class =='FS' & snr >= 1) | (label_class =='NN')",inplace=True)
+
+
 data = dataset.data
 
 # Add group ID for train/test splits (annotations with the same groupID can't be in different train or test sets)
@@ -119,6 +132,18 @@ for train_index, test_index in skf.split(
 ):
     data_train, data_test = data.iloc[train_index], data.iloc[test_index]
     break
+
+print('----------------------------------')
+print('Train set:')
+print(' ')
+print(data_train.pivot_table(index='deployment_ID', columns='class_ID', aggfunc="size", fill_value=0))
+
+print('----------------------------------')
+print('Test set:')
+print(' ')
+print(data_test.pivot_table(index='deployment_ID', columns='class_ID', aggfunc="size", fill_value=0))
+
+
 
 data_train.to_csv(os.path.join(current_out_dir, "train.csv"))
 data_test.to_csv(os.path.join(current_out_dir, "test.csv"))

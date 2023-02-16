@@ -39,6 +39,7 @@ from ketos.neural_networks.dev_utils.detection import (
     save_detections,
     merge_overlapping_detections,
 )
+from ketos.audio.spectrogram import MagSpectrogram
 from ecosound.core.annotation import Annotation
 import os
 import soundfile as sf
@@ -52,6 +53,8 @@ import platform
 import logging
 import time
 import sqlite3
+import pandas as pd
+from packaging import version
 
 
 def set_logger(outdir):
@@ -103,14 +106,17 @@ def decimate(
     # load audio data
     audio_data.read(channel=channel - 1, detrend=True)
     # decimate
-    audio_data.decimate(sampling_rate_hz)
-    # detrend
-    audio_data.detrend()
-    # normalize
-    audio_data.normalize()
-    # write new file
-    outfilename = os.path.basename(os.path.splitext(infile)[0]) + ".wav"
-    audio_data.write(os.path.join(out_dir, outfilename))
+    if sampling_rate_hz <= audio_data.file_sampling_frequency:
+        audio_data.decimate(sampling_rate_hz)
+        # detrend
+        audio_data.detrend()
+        # normalize
+        audio_data.normalize()
+        # write new file
+        outfilename = os.path.basename(os.path.splitext(infile)[0]) + ".wav"
+        audio_data.write(os.path.join(out_dir, outfilename))
+    else:
+        raise Exception("The sampling frequency of the recording is too low.")
     return outfilename
 
 
@@ -272,31 +278,57 @@ for idx, file in enumerate(files):
         logger.info(file)
         start_time = time.time()
         print(str(idx + 1) + r"/" + str(len(files)) + ": " + file)
+        
+        # list files for SQL table for book keeping
+        file_tab = pd.DataFrame({'File_processed':[os.path.split(file)[1]]})
 
         # Decimate
         temp_file_name = decimate(
             file, args.tmp_dir_audio, spec_config["rate"], channel=args.channel
         )
         # initialize the audio loader
+        # if version.parse(ketos.__version__) < version.parse("2.6.2"):
+        # audio_loader = AudioFrameLoader(
+        #     duration=spec_config["duration"],
+        #     step=args.step_size,
+        #     path=args.tmp_dir_audio,
+        #     filename=[temp_file_name],
+        #     repres=spec_config,
+        # )
+        # else:
         audio_loader = AudioFrameLoader(
             duration=spec_config["duration"],
             step=args.step_size,
             path=args.tmp_dir_audio,
             filename=[temp_file_name],
-            repres=spec_config,
-            # representation_params=spec_config,
+            representation=spec_config["type"],
+            representation_params=spec_config,
         )
         # process the audio data
-        detections = process(
-            provider=audio_loader,
-            model=model,
-            batch_size=args.num_segs,
-            buffer=args.buffer,
-            threshold=args.threshold,
-            group=args.group,
-            win_len=args.win_len,
-            progress_bar=args.progress_bar,
-        )
+        try:
+            detections = process(
+                provider=audio_loader,
+                model=model,
+                batch_size=args.num_segs,
+                buffer=args.buffer,
+                threshold=args.threshold,
+                group=args.group,
+                win_len=args.win_len,
+                progress_bar=args.progress_bar,
+            )
+        except Exception as e:
+            print('Processing failed. Trying again without score averaging...')
+            detections = process(
+                provider=audio_loader,
+                model=model,
+                batch_size=1,
+                buffer=args.buffer,
+                threshold=args.threshold,
+                group=False,
+                win_len=1,
+                progress_bar=args.progress_bar,
+            )
+                
         # merge overlapping detections
         if args.merge == True:
             detections = merge_overlapping_detections(detections)
@@ -389,14 +421,26 @@ for idx, file in enumerate(files):
             # save output to Raven
             annot.to_raven(
                 args.output_folder,
-                os.path.splitext(file)[0]
+                os.path.split(file)[1]
                 + ".chan"
                 + str(args.channel)
                 + ".Table.1.selections.txt",
                 single_file=False,
             )
             # save output to NetCDF
-            annot.to_netcdf(os.path.splitext(file)[0])
+            #annot.to_netcdf(os.path.splitext(file)[0])
+            annot.to_netcdf(os.path.join(args.output_folder, os.path.split(file)[1]))
+        
+        # Save file name to SQLite
+        database = os.path.join(args.output_folder, "detections.sqlite")
+        conn = sqlite3.connect(database)
+        file_tab.to_sql(
+            name="files_processed", con=conn, if_exists="append", index=False
+        )
+        conn.close()
+
+        
+        # display processing time
         proc_time_file = time.time() - start_time
         logger.info("--- Executed in %0.4f seconds ---" % (proc_time_file))
         print(f"Executed in {proc_time_file:0.4f} seconds")
