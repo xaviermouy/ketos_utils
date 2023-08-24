@@ -11,37 +11,32 @@ This script creat a duirnal plot of detections or annotations
 @author: xavier.mouy
 """
 
-import sys
-sys.path.append(r"C:\Users\xavier.mouy\Documents\GitHub\ecosound") # Adds higher directory to python modules path.
+#import sys
+#sys.path.append(r"C:\Users\xavier.mouy\Documents\GitHub\ecosound") # Adds higher directory to python modules path.
 
 from ecosound.core.annotation import Annotation
 import ecosound
 
 ## inputs #####################################################################
-annot_file = r'C:\Users\xavier.mouy\Documents\Projects\2021_Minke_detector\results\NEFSC_CARIBBEAN_201612_MTQ\detections.sqlite'
-annot_file = r'C:\Users\xavier.mouy\Documents\Projects\2021_Minke_detector\results\NEFSC_CARIBBEAN_201612_MTQ_run1\detections.nc'
+annot_file = r'C:\Users\xavier.mouy\Documents\Projects\2022_DFO_fish_catalog\RCA_Analysis\Ketos_test_results\RCA_In_Dec3_2018_Jan30_201967391491\detections.sqlite'
+#annot_file = r'C:\Users\xavier.mouy\Documents\Projects\2021_Minke_detector\results\NEFSC_CARIBBEAN_201612_MTQ_run1\detections.nc'
 #annot_file = r'C:\Users\xavier.mouy\Documents\Projects\2021_Minke_detector\results\NEFSC_GA_201611_CH6\detections.nc'
 #annot_file = r'C:\Users\xavier.mouy\Documents\GitHub\minke-whale-dataset\datasets\FRA-NEFSC-CARIBBEAN-201612-MTQ\Annotations_dataset_FRA-NEFSC-CARIBBEAN-201612-MTQ annotations.nc'
 
 integration_time = '1H'
 is_binary = False
-norm_max = None
+norm_max = 150
 threshold = 0.9
 ###############################################################################
 
-# Load annotations
+# Load detections
+detec = Annotation()
+detec.from_sqlite(annot_file)
 
-# # manual analysis
-# annot.from_netcdf(annot_file)
-# data = annot.data
+# filter to species
 
-# # detector 1
-# annot.from_sqlite(annot_file)
-# data = annot.data
-# data = data[data['confidence']>=threshold]
+# filter to confidence
+detec.filter('confidence >= '+ str(threshold), inplace=True)
 
-# # # detector 2
-# annot.from_netcdf(annot_file)
-# data = annot.data
-# data = data[data['confidence']>=threshold]
-
+# plot
+detec.heatmap(norm_value=norm_max)

@@ -59,77 +59,27 @@ from ketos.audio.spectrogram import MagSpectrogram
 # params["aug_min_annot_ovlp"] = 0.90
 
 params = dict()
-params[
-    "train_annot_file"
-] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\train.csv"
-params[
-    "test_annot_file"
-] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\test.csv"
+params["train_annot_file"] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230206T120453\train.csv"
+params["test_annot_file"] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230206T120453\test.csv"
+params["data_train_dir"] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230206T120453\train_data"
+params["data_test_dir"] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230206T120453\test_data"
+params["out_dir"] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230206T120453\databases\test"
+params["spectro_config_file"] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230206T120453\databases\test\spec_config.json"
 
-params[
-    "data_train_dir"
-] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\train_data"
-params[
-    "data_test_dir"
-] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\test_data"
-params[
-    "out_dir"
-] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\databases\spectro-10s_fft-0.256_step-0.03_fmin-0_fmax-800_no-norm"
-params[
-    "spectro_config_file"
-] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\databases\spectro-10s_fft-0.256_step-0.03_fmin-0_fmax-800_no-norm\spec_config.json"
-
-
-params["class_labels"] = []
-params["class_labels"].append(
-    ["NN", "HB", "HK", "HKP", "NNS", "HKPT"]
-)  # class 0
-params["class_labels"].append(["MW"])  # class 1
-
-params["max_samples_per_class_train"] = [400000, None]
-params["max_samples_per_class_test"] = [None, None]
-
-# segemnt duration in sec for the CNN:
-params["classif_window_sec"] = 10  # 0.4
-# step between consecutive windows in sec (0: no augmentation):
-params["aug_win_step_sec"] = 1
-# windows must contain at least x% of the annotation:
-params["aug_min_annot_ovlp"] = 0.90
-
-
-
-
-params = dict()
-params[
-    "train_annot_file"
-] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\train.csv"
-params[
-    "test_annot_file"
-] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\test.csv"
-
-params[
-    "data_train_dir"
-] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\train_data"
-params[
-    "data_test_dir"
-] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\test_data"
-params[
-    "out_dir"
-] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\databases\spectro-0.2s_fft-0.128_step-0.005_fmin-0_fmax-800_no-norm"
-params[
-    "spectro_config_file"
-] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\databases\spectro-0.2s_fft-0.128_step-0.005_fmin-0_fmax-800_no-norm\spec_config.json"
 params["class_labels"] = []
 params["class_labels"].append(["NN","HS","KW"])  # class 0
 params["class_labels"].append(["FS"])  # class 1
-params["max_samples_per_class_train"] = [None, None]
-params["max_samples_per_class_test"] = [None, None]
-# segemnt duration in sec for the CNN:
+
+params["max_samples_per_class_train"] = [100, None]
+params["max_samples_per_class_test"] = [100, None]
+
+# segment duration in sec for the CNN:
 params["classif_window_sec"] = 0.2
 # step between consecutive windows in sec (0: no augmentation):
-params["aug_win_step_sec"] = 0.05
+params["aug_win_step_sec"] = 0
 # windows must contain at least x% of the annotation:
 params["aug_min_annot_ovlp"] = 0.9
+
 
 ## ############################################################################
 
@@ -370,13 +320,13 @@ dbi.create_database(
     # mode="w",
 )
 
-# dbi.create_database(
-#     output_file=db_file,
-#     data_dir=params["data_test_dir"],
-#     dataset_name="test",
-#     selections=std_annot_test_aug_final,
-#     audio_repres=spec_cfg,
-# )
+dbi.create_database(
+    output_file=db_file,
+    data_dir=params["data_test_dir"],
+    dataset_name="test",
+    selections=std_annot_test_aug_final,
+    audio_repres=spec_cfg,
+)
 
 # db = dbi.open_file("database.h5", 'r')
 
