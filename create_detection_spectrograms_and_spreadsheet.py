@@ -33,7 +33,6 @@ def set_args_parser():
         default=0.5,
         help="minimum confidence value of detections to extract. Default is 0.5",
     )
-
     return parser
 
 def run():
@@ -85,7 +84,7 @@ def run():
         file_name_field="time_max_date",
         # file_name_field="audio_file_name",
         file_prefix_field="confidence",
-        channel=0,
+        channel=None,
         colormap="Greys",  # "viridis",
         save_wav=True,
     )
