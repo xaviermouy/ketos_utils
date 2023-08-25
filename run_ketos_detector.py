@@ -254,18 +254,22 @@ def classify_spectro_segments(spectro, model, spec_config, args):
 
 
 def define_detections(scores, seg_times_sec, spec_config, audio_repr, file, args):
+    scores = np.concatenate(([0], scores, [0]))
     # extract detections start and stop times
     start_indices = [i for i in range(1, len(scores)) if
                      (scores[i] >= args.threshold) & (scores[i - 1] < args.threshold)]
     end_indices = [i - 1 for i in range(1, len(scores)) if
                    (scores[i] < args.threshold) & (scores[i - 1] >= args.threshold)]
-    if scores[0] >= args.threshold:  # adjust if first segment is a detection
-        start_indices = [0] + start_indices
-    if scores[-1] >= args.threshold:  # adjust if last segment is a detection
-        end_indices = start_indices + [len(scores) - 1]
+    #if scores[0] >= args.threshold:  # adjust if first segment is a detection
+    #    start_indices = [0] + start_indices
+    #if scores[-1] >= args.threshold:  # adjust if last segment is a detection
+    #    end_indices = start_indices + [len(scores) - 1]
     if len(start_indices) != len(end_indices):
         raise ('Error while defining detection start and stop times')
     if len(start_indices) > 0:  # if any detections
+        start_indices = [x - 1 for x in start_indices]
+        end_indices = [x - 1 for x in end_indices]
+        scores = scores[1:-1]
         detec_start_times_sec = [seg_times_sec[i] for i in start_indices]
         detec_end_times_sec = [seg_times_sec[i] for i in end_indices]
         detec_end_times_sec = [i + audio_repr[0]['spectrogram']['duration'] for i in detec_end_times_sec]
