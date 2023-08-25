@@ -260,9 +260,9 @@ def define_detections(scores, seg_times_sec, spec_config, audio_repr, file, args
     end_indices = [i - 1 for i in range(1, len(scores)) if
                    (scores[i] < args.threshold) & (scores[i - 1] >= args.threshold)]
     if scores[0] >= args.threshold:  # adjust if first segment is a detection
-        start_indices = [0, start_indices]
+        start_indices = [0] + start_indices
     if scores[-1] >= args.threshold:  # adjust if last segment is a detection
-        end_indices = [start_indices, len(scores) - 1]
+        end_indices = start_indices + [len(scores) - 1]
     if len(start_indices) != len(end_indices):
         raise ('Error while defining detection start and stop times')
     if len(start_indices) > 0:  # if any detections
