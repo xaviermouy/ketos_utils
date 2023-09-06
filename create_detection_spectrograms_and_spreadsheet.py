@@ -9,6 +9,9 @@ from ecosound.core.measurement import Measurement
 import datetime
 import os
 import argparse
+import sqlite3
+import pandas as pd
+from ecosound.core.tools import filename_to_datetime
 
 def set_args_parser():
     parser = argparse.ArgumentParser(
@@ -50,6 +53,14 @@ def run():
     dataset = Measurement()
     dataset.from_sqlite(os.path.join(in_dir, sqlite_file))
 
+    # load files processed
+    conn = sqlite3.connect(os.path.join(in_dir, sqlite_file))
+    files_list = pd.read_sql_query("SELECT * FROM " + "files_processed", conn)
+    conn.close()
+    dates = filename_to_datetime(list(files_list['File_processed']))
+    min_date = str(min(dates))
+    max_date = str(max(dates))
+
     # Filter
     print("Filtering detections...")
     dataset.filter("label_class=='MW'", inplace=True)
@@ -70,9 +81,9 @@ def run():
         out_dir,
         time_buffer_sec=5,
         spectro_unit="sec",
-        spetro_nfft=0.128,
+        spetro_nfft=0.256,
         spetro_frame=0.128,
-        spetro_inc=0.064,
+        spetro_inc=0.032,
         freq_min_hz=0,
         freq_max_hz=1000,
         sanpling_rate_hz=2000,
@@ -92,7 +103,10 @@ def run():
     # Create daily agggregate.
     print("Creating detections daily aggregates...")
     daily_counts = dataset.calc_time_aggregate_1D(
-        integration_time="1D", resampler="count"
+        integration_time="1D",
+        resampler="count",
+        start_date= str(min(dates)),
+        end_date= str(max(dates)),
     )
     daily_counts.rename(columns={"value": "Detections"}, inplace=True)
 
