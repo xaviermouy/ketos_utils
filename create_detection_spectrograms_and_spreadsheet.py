@@ -6,6 +6,7 @@ Created on Wed Mar  2 08:22:48 2022
 """
 
 from ecosound.core.measurement import Measurement
+from ecosound.core.annotation import Annotation
 import datetime
 import os
 import argparse
@@ -50,8 +51,10 @@ def run():
 
     # Load dataset
     print("Loading detections...")
-    dataset = Measurement()
-    dataset.from_sqlite(os.path.join(in_dir, sqlite_file))
+    #dataset = Measurement()
+    #dataset.from_sqlite(os.path.join(in_dir, sqlite_file))
+    dataset = Annotation()
+    dataset.from_netcdf(in_dir)
 
     # load files processed
     conn = sqlite3.connect(os.path.join(in_dir, sqlite_file))
