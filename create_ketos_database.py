@@ -58,78 +58,65 @@ from ketos.audio.spectrogram import MagSpectrogram
 # # windows must contain at least x% of the annotation:
 # params["aug_min_annot_ovlp"] = 0.90
 
-params = dict()
-params[
-    "train_annot_file"
-] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\train.csv"
-params[
-    "test_annot_file"
-] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\test.csv"
-
-params[
-    "data_train_dir"
-] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\train_data"
-params[
-    "data_test_dir"
-] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\test_data"
-params[
-    "out_dir"
-] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\databases\spectro-10s_fft-0.256_step-0.03_fmin-0_fmax-800_no-norm"
-params[
-    "spectro_config_file"
-] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\databases\spectro-10s_fft-0.256_step-0.03_fmin-0_fmax-800_no-norm\spec_config.json"
-
-
-params["class_labels"] = []
-params["class_labels"].append(
-    ["NN", "HB", "HK", "HKP", "NNS", "HKPT"]
-)  # class 0
-params["class_labels"].append(["MW"])  # class 1
-
-params["max_samples_per_class_train"] = [400000, None]
-params["max_samples_per_class_test"] = [None, None]
-
-# segemnt duration in sec for the CNN:
-params["classif_window_sec"] = 10  # 0.4
-# step between consecutive windows in sec (0: no augmentation):
-params["aug_win_step_sec"] = 1
-# windows must contain at least x% of the annotation:
-params["aug_min_annot_ovlp"] = 0.90
-
-
-
+# params = dict()
+# params[
+#     "train_annot_file"
+# ] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\train.csv"
+# params[
+#     "test_annot_file"
+# ] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\test.csv"
+#
+# params[
+#     "data_train_dir"
+# ] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\train_data"
+# params[
+#     "data_test_dir"
+# ] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\test_data"
+# params[
+#     "out_dir"
+# ] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\databases\spectro-10s_fft-0.256_step-0.03_fmin-0_fmax-800_no-norm"
+# params[
+#     "spectro_config_file"
+# ] = r"D:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\databases\spectro-10s_fft-0.256_step-0.03_fmin-0_fmax-800_no-norm\spec_config.json"
+#
+#
+# params["class_labels"] = []
+# params["class_labels"].append(
+#     ["NN", "HB", "HK", "HKP", "NNS", "HKPT"]
+# )  # class 0
+# params["class_labels"].append(["MW"])  # class 1
+#
+# params["max_samples_per_class_train"] = [400000, None]
+# params["max_samples_per_class_test"] = [None, None]
+#
+# # segemnt duration in sec for the CNN:
+# params["classif_window_sec"] = 10  # 0.4
+# # step between consecutive windows in sec (0: no augmentation):
+# params["aug_win_step_sec"] = 1
+# # windows must contain at least x% of the annotation:
+# params["aug_min_annot_ovlp"] = 0.90
 
 params = dict()
-params[
-    "train_annot_file"
-] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\train.csv"
-params[
-    "test_annot_file"
-] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\test.csv"
+params["train_annot_file"] = r"C:\Users\xavie\OneDrive\Desktop\KETOS\dataset_20230928T100401\train.csv"
+params["test_annot_file"] = r"C:\Users\xavie\OneDrive\Desktop\KETOS\dataset_20230928T100401\test.csv"
+params["data_train_dir"] = r"C:\Users\xavie\OneDrive\Desktop\KETOS\dataset_20230928T100401\train_data"
+params["data_test_dir"] = r"C:\Users\xavie\OneDrive\Desktop\KETOS\dataset_20230928T100401\test_data"
+params["out_dir"] = r"C:\Users\xavie\OneDrive\Desktop\KETOS\dataset_20230928T100401\databases\spectro-0.5s_fft-0.06_step-0.008_fmin-0_fmax-800_augmented"
+params["spectro_config_file"] = r"C:\Users\xavie\OneDrive\Desktop\KETOS\dataset_20230928T100401\databases\spectro-0.5s_fft-0.06_step-0.008_fmin-0_fmax-800\spec_config.json"
 
-params[
-    "data_train_dir"
-] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\train_data"
-params[
-    "data_test_dir"
-] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\test_data"
-params[
-    "out_dir"
-] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\databases\spectro-0.2s_fft-0.128_step-0.005_fmin-0_fmax-800_no-norm"
-params[
-    "spectro_config_file"
-] = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230203T162039\databases\spectro-0.2s_fft-0.128_step-0.005_fmin-0_fmax-800_no-norm\spec_config.json"
 params["class_labels"] = []
-params["class_labels"].append(["NN","HS","KW"])  # class 0
-params["class_labels"].append(["FS"])  # class 1
-params["max_samples_per_class_train"] = [None, None]
-params["max_samples_per_class_test"] = [None, None]
+params["class_labels"].append(["NN", "HB", "MW"])  # class 0
+params["class_labels"].append(["HK"])  # class 1
+params["max_samples_per_class_train"] = [40000, 20000]
+params["max_samples_per_class_test"] = [40000, 20000]
+
 # segemnt duration in sec for the CNN:
-params["classif_window_sec"] = 0.2
+params["classif_window_sec"] = 0.5  # 0.4
 # step between consecutive windows in sec (0: no augmentation):
-params["aug_win_step_sec"] = 0.05
+params["aug_win_step_sec"] = 0.1 #0.1
 # windows must contain at least x% of the annotation:
-params["aug_min_annot_ovlp"] = 0.9
+params["aug_min_annot_ovlp"] = 1 #0.90
+
 
 ## ############################################################################
 
@@ -367,16 +354,16 @@ dbi.create_database(
     verbose=True,
     progress_bar=True,
     discard_wrong_shape=False,
-    # mode="w",
+    mode="w",
 )
 
-# dbi.create_database(
-#     output_file=db_file,
-#     data_dir=params["data_test_dir"],
-#     dataset_name="test",
-#     selections=std_annot_test_aug_final,
-#     audio_repres=spec_cfg,
-# )
+dbi.create_database(
+    output_file=db_file,
+    data_dir=params["data_test_dir"],
+    dataset_name="test",
+    selections=std_annot_test_aug_final,
+    audio_repres=spec_cfg,
+)
 
 # db = dbi.open_file("database.h5", 'r')
 

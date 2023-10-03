@@ -32,37 +32,58 @@ import os
 import csv
 
 
-def decimate(train_file, train_dir, params):
+def decimate(infile, outfile, channel, params):
     # init audio file
-    audio_data = Sound(train_file)
+    audio_data = Sound(infile)
     # load audio data
-    audio_data.read(channel=0, detrend=True)
+    audio_data.read(channel=channel-1, detrend=True)
+    # bandpass filter
+    filter_type='bandpass'
+    cutoff_frequencies=params["bandpass_filter_fc"]
+    audio_data.filter(filter_type, cutoff_frequencies, order=params["filter_order"], verbose=True)
     # decimate
     audio_data.decimate(params["sanpling_rate_hz"])
-    # detrend
-    audio_data.detrend()
+    ## detrend
+    #audio_data.detrend()
     # normalize
-    audio_data.normalize()
+    #audio_data.normalize(method='std')
+    audio_data.normalize(method='amplitude')
     # write new file
-    outfilename = os.path.basename(os.path.splitext(train_file)[0]) + ".wav"
-    audio_data.write(os.path.join(train_dir, outfilename))
-
+    #outfilename = os.path.basename(os.path.splitext(train_file)[0]) + ".wav"
+    audio_data.write(outfile)
 
 ## ############################################################################
 params = dict()
 params[
     "dataset_file_path"
-] = r"D:\NOAA\2022_BC_fish_detector\manual_annotations\Annotations_dataset_FS-NN-UN-HS-KW_20230202T135354_withSNRgt2dB.nc"
-params["out_dir"] = r"D:\NOAA\2022_BC_fish_detector\ketos"
-params["group_timeframe"] = "1H"
+] = r"D:\MANUAL_ANNOTATIONS\Annotations_dataset_HK-NN-MW-HB_20230928T100147.nc"
+params["out_dir"] = r"C:\Users\xavie\OneDrive\Desktop\KETOS"
+params["group_timeframe"] = "6H"
 params["train_ratio"] = 0.75
 
-params["sanpling_rate_hz"] = 4000
+params["sanpling_rate_hz"] = 2000
+params["bandpass_filter_fc"]=[20,800]
 params["filter_type"] = "iir"
 params["filter_order"] = 8
 
 # if True, startifies using [label_class + label_subclass]
 params["use_subclass_label"] = False
+
+
+# params = dict()
+# params[
+#     "dataset_file_path"
+# ] = r"D:\NOAA\2022_BC_fish_detector\manual_annotations\Annotations_dataset_FS-NN-UN-HS-KW_20230202T135354_withSNRgt2dB.nc"
+# params["out_dir"] = r"D:\NOAA\2022_BC_fish_detector\ketos"
+# params["group_timeframe"] = "1H"
+# params["train_ratio"] = 0.75
+#
+# params["sanpling_rate_hz"] = 4000
+# params["filter_type"] = "iir"
+# params["filter_order"] = 8
+#
+# # if True, startifies using [label_class + label_subclass]
+# params["use_subclass_label"] = False
 
 ## ############################################################################
 
@@ -143,8 +164,11 @@ print('Test set:')
 print(' ')
 print(data_test.pivot_table(index='deployment_ID', columns='class_ID', aggfunc="size", fill_value=0))
 
+# Add channel number to filename so it can handle multichannel files
+data_train["audio_file_name"]= data_train["audio_file_name"] + '_CH' + data_train["audio_channel"].astype(str)
+data_test["audio_file_name"]= data_test["audio_file_name"] + '_CH' + data_test["audio_channel"].astype(str)
 
-
+# save to train and test sets to CSV
 data_train.to_csv(os.path.join(current_out_dir, "train.csv"))
 data_test.to_csv(os.path.join(current_out_dir, "test.csv"))
 
@@ -159,7 +183,15 @@ train_files = list(set(train_files))
 train_dir = os.path.join(current_out_dir, "train_data")
 os.mkdir(train_dir)
 for train_file in train_files:
-    decimate(train_file, train_dir, params)
+    print(train_file)
+    split_tup = os.path.splitext(train_file)
+    file_name = split_tup[0]
+    file_extension = split_tup[1]
+    ch_idx = file_name.rfind('_CH')
+    infile = file_name[:ch_idx] + file_extension
+    outfile = os.path.join(train_dir,os.path.basename(file_name)) + ".wav"
+    channel = int(file_name[ch_idx+3:])
+    decimate(infile, outfile, channel, params)
 
 # create test folder and decimate audio file
 test_files = (
@@ -172,4 +204,13 @@ test_files = list(set(test_files))
 test_dir = os.path.join(current_out_dir, "test_data")
 os.mkdir(test_dir)
 for test_file in test_files:
-    decimate(test_file, test_dir, params)
+    #decimate(test_file, test_dir, params)
+    print(test_file)
+    split_tup = os.path.splitext(test_file)
+    file_name = split_tup[0]
+    file_extension = split_tup[1]
+    ch_idx = file_name.rfind('_CH')
+    infile = file_name[:ch_idx] + file_extension
+    outfile = os.path.join(test_dir,os.path.basename(file_name)) + ".wav"
+    channel = int(file_name[ch_idx+3:])
+    decimate(infile, outfile, channel, params)
