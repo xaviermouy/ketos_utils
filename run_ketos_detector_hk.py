@@ -46,6 +46,7 @@ import logging
 import time
 import sqlite3
 from packaging import version
+import stat
 
 from ketos.audio.spectrogram import MagSpectrogram, PowerSpectrogram
 from ketos.audio.audio_loader import AudioFrameLoader
@@ -201,6 +202,24 @@ def set_logger(outdir):
     return logger
 
 
+def onerror(func, path, exc_info):
+    """
+    Error handler for ``shutil.rmtree``.
+
+    If the error is due to an access error (read only file)
+    it attempts to add write permission and then retries.
+
+    If the error is for another reason it re-raises the error.
+
+    Usage : ``shutil.rmtree(path, onerror=onerror)``
+    """
+    # Is the error an access error?
+    if not os.access(path, os.W_OK):
+        os.chmod(path, stat.S_IWUSR)
+        func(path)
+    else:
+        raise
+
 def decimate(
         infile,
         out_dir,
@@ -313,10 +332,13 @@ def define_detections(scores, seg_times_sec, spec_config, audio_repr, file, args
         annot_data["audio_file_dir"] = os.path.dirname(file)  # args.audio_folder
         annot_data["audio_file_name"] = os.path.splitext(os.path.basename(file))[0]  # files_list
         annot_data["audio_file_extension"] = args.extension
-        annot_data["label_class"] = "MW"
+        annot_data["label_class"] = "HK"
         annot_data["confidence"] = detec_scores  # confidence_list
-        annot_data["software_name"] = "Ketos-Minke"
+        annot_data["software_name"] = "Ketos-Haddock"
+        annot_data["software_version"]='0.1'
         annot_data["entry_date"] = datetime.now()
+        # annot_data["audio_channel"] = args.channel
+        # annot_data["audio_sampling_frequency"]=audio_repr[0]['spectrogram']['rate']
         if timestamp:
             annot_data["audio_file_start_date"] = file_timestamp
             annot_data["time_min_date"] = pd.to_datetime(
@@ -342,10 +364,12 @@ def define_detections(scores, seg_times_sec, spec_config, audio_repr, file, args
         elif args.deployment_id:
             annot.insert_metadata_blank()
             annot.insert_values(deployment_ID=args.deployment_id)
+            annot.insert_values(audio_channel=args.channel)
+            annot.insert_values(audio_sampling_frequency=audio_repr[0]['spectrogram']['rate'])
         else:
             annot.insert_metadata_blank()
-
-        annot.insert_values(audio_channel=args.channel)
+            annot.insert_values(audio_channel = args.channel)
+            annot.insert_values(audio_sampling_frequency= audio_repr[0]['spectrogram']['rate'])
 
         # sort chronologically
         annot.data.sort_values(
@@ -373,7 +397,7 @@ def run():
     if args.smooth_sec == 0:
         smooth_bins = 1
     else:
-        smooth_bins = args.smooth_sec / args.step_sec
+        smooth_bins = round(args.smooth_sec / args.step_sec)
     is_even = True if smooth_bins % 2 == 0 else False
     if is_even:  # adjust smooth_bin so it is an odd number (required)
         smooth_bins += 1

@@ -360,7 +360,7 @@ def run():
     if args.smooth_sec == 0:
         smooth_bins = 1
     else:
-        smooth_bins = args.smooth_sec / args.step_sec
+        smooth_bins = round(args.smooth_sec / args.step_sec)
     is_even = True if smooth_bins % 2 == 0 else False
     if is_even:  # adjust smooth_bin so it is an odd number (required)
         smooth_bins += 1

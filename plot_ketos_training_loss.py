@@ -6,9 +6,11 @@ Created on Wed Apr  6 10:07:31 2022
 """
 
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
+matplotlib.use('TkAgg')
 
-infile = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230206T120453\databases\spectro-0.4s_fft-0.128_step-0.005_fmin-0_fmax-1200_no-norm\model\bs256_ep50\log.csv"
+infile = r"G:\NOAA\2023_Haddock_detector\ketos\dataset_20230928T100401\databases\spectro-0.5s_fft-0.06_step-0.008_fmin-0_fmax-800_augmented\results\bs32_ep50\log.csv"
 
 df = pd.read_csv(infile)
 pd.pivot_table(
@@ -20,3 +22,5 @@ pd.pivot_table(
 pd.pivot_table(
     df.reset_index(), index="epoch", columns="dataset", values="Recall"
 ).plot(subplots=False, grid=True, ylabel="Recall", xlabel="Epoch")
+
+plt.show()
