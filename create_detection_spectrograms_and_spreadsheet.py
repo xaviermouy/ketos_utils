@@ -12,7 +12,7 @@ import os
 import argparse
 import sqlite3
 import pandas as pd
-from ecosound.core.tools import filename_to_datetime
+from ecosound.core.tools import filename_to_datetime, list_files
 
 def set_args_parser():
     parser = argparse.ArgumentParser(
@@ -46,7 +46,7 @@ def run():
 
     # in_dir = r"Z:\STAFF\Xavier\ketos_minke_detector\NEFSC_MA-RI_COX01\NEFSC_MA-RI_202107_COX01"
     in_dir = args.detec_dir
-    sqlite_file = "detections.sqlite"
+    #sqlite_file = "detections.sqlite"
     aggregate_time_offset = args.time_offset
 
     # Load dataset
@@ -57,9 +57,11 @@ def run():
     dataset.from_netcdf(in_dir)
 
     # load files processed
-    conn = sqlite3.connect(os.path.join(in_dir, sqlite_file))
-    files_list = pd.read_sql_query("SELECT * FROM " + "files_processed", conn)
-    conn.close()
+    #conn = sqlite3.connect(os.path.join(in_dir, sqlite_file))
+    #files_list = pd.read_sql_query("SELECT * FROM " + "files_processed", conn)
+    #conn.close()
+    files_list = list_files(in_dir, suffix='.nc')
+
     dates = filename_to_datetime(list(files_list['File_processed']))
     min_date = str(min(dates))
     max_date = str(max(dates))
