@@ -1,0 +1,16 @@
+{
+	"spectrogram": {
+		"rate": "4000 Hz",
+		"window": "0.064 s",
+		"step": "0.00125 s",
+		"freq_min": "0 Hz",
+		"freq_max": "1700 Hz",
+		"window_func": "blackman",
+		"duration": "0.4 s",
+		"type": "MagSpectrogram",
+		"denoiser": [
+			{"name": "median_equalizer","window_duration_sec": 3}
+		]
+    }
+}
+

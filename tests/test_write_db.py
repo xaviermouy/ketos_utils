@@ -16,7 +16,7 @@ import tables
 import yaml
 
 # Read db file
-path = r'C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\tests\database.h5'
+path = r'G:\NOAA\2022_BC_fish_detector\ketos\dataset_20230206T120453\databases\spectro-0.4s_fft-0.128_step-0.005_fmin-0_fmax-1200_no-norm\database.h5'
 mode ='r'
 file = tables.open_file(path, mode)
 

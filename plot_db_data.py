@@ -11,7 +11,7 @@ import numpy as np
 
 #db_file = r"C:\Users\xavier.mouy\Documents\GitHub\ketos_utils\minke\20220401T140308\ketos_databases\spectro-5s_fft-0.128_step-0.064_fmin-0_fmax-800\database.h5"
 #db_file = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230202T162110\databases\spectro-0.4s_fft-0.128_step-0.005_fmin-0_fmax-800_no-norm\database.h5"
-db_file = r"D:\NOAA\2022_BC_fish_detector\ketos\dataset_20230206T120453\databases\spectro-0.4s_fft-0.128_step-0.005_fmin-0_fmax-1200_no-norm\database.h5"
+db_file = r"G:\NOAA\2022_BC_fish_detector\ketos\dataset_20230206T120453\databases\spectro-0.4s_fft-0.128_step-0.005_fmin-0_fmax-1200_no-norm\database.h5"
 
 
 db = dbi.open_file(db_file, "r")

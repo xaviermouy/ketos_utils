@@ -46,11 +46,11 @@ def run():
 
     # in_dir = r"Z:\STAFF\Xavier\ketos_minke_detector\NEFSC_MA-RI_COX01\NEFSC_MA-RI_202107_COX01"
     in_dir = args.detec_dir
-    #sqlite_file = "detections.sqlite"
     aggregate_time_offset = args.time_offset
 
     # Load dataset
     print("Loading detections...")
+    #sqlite_file = "detections.sqlite"
     #dataset = Measurement()
     #dataset.from_sqlite(os.path.join(in_dir, sqlite_file))
     dataset = Annotation()
@@ -62,7 +62,8 @@ def run():
     #conn.close()
     files_list = list_files(in_dir, suffix='.nc')
 
-    dates = filename_to_datetime(list(files_list['File_processed']))
+    #dates = filename_to_datetime(list(files_list['File_processed']))
+    dates = filename_to_datetime(files_list)
     min_date = str(min(dates))
     max_date = str(max(dates))
 
