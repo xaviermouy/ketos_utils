@@ -55,7 +55,7 @@ import matplotlib.pyplot as plt
 
 
 # import warnings
-# matplotlib.use('TkAgg')
+matplotlib.use('TkAgg')
 
 def set_args_parser():
     parser = argparse.ArgumentParser(
@@ -213,11 +213,28 @@ def decimate(
     audio_data = Sound(infile)
     # load audio data
     audio_data.read(channel=channel - 1, detrend=True)
+
+
     # decimate
     if sampling_rate_hz <= audio_data.file_sampling_frequency:
         audio_data.decimate(sampling_rate_hz)
         # detrend
         audio_data.detrend()
+        # remove hp capacitance bump
+        audio_data._filter_applied = False
+        audio_data.filter('highpass', [3])
+        # Detects hp capacitance bump at beginning of recording
+        nb_sec = 5 #  nb of sec at beginning with possible hp capacitance bump or ST cal tones
+        hp_artifact_start_sample = int(np.round(nb_sec * audio_data.waveform_sampling_frequency))
+        max_val_start = np.max(audio_data.waveform[0:hp_artifact_start_sample])
+        max_val_rest = np.max(audio_data.waveform[hp_artifact_start_sample:])
+        if max_val_start / max_val_rest > 10:
+            print('Hydrophone power-up artifact detected. Ignoring the 5 first seconds of recording.')
+            mirror = np.flip(audio_data.waveform[hp_artifact_start_sample:2*hp_artifact_start_sample])
+            audio_data.waveform[0:hp_artifact_start_sample]=mirror
+        # remove huge outliers
+        audio_data.waveform[audio_data.waveform > (20 * np.std(audio_data.waveform))] = 0
+        audio_data.waveform[audio_data.waveform < -(20 * np.std(audio_data.waveform))] = 0
         # normalize
         audio_data.normalize()
         # write new file
@@ -242,7 +259,15 @@ def classify_spectro_segments(spectro, model, spec_config, args):
     for seg_indices_batch in seg_indices_batches:
         batch_data = []
         for idx in seg_indices_batch:
-            batch_data.append(spectro_data[idx:idx + duration_bins, :])
+            gram = spectro_data[idx:idx + duration_bins, :]
+            #gram = gram - np.mean(gram)
+            #gram = gram / np.std(gram)
+
+            #gram = gram + np.abs(np.min(gram))
+            #gram = gram / np.max(gram)
+
+            batch_data.append(gram)
+            #batch_data.append(spectro_data[idx:idx + duration_bins, :])
         batch_data = np.array(batch_data)
         if first_batch:
             scores = model.run_on_batch(batch_data, return_raw_output=True)
@@ -332,7 +357,7 @@ def define_detections(scores, seg_times_sec, spec_config, audio_repr, file, args
         else:
             annot.insert_metadata_blank()
 
-        annot.insert_values(audio_channel=args.channel)
+        annot.insert_values(audio_channel=str(args.channel))
 
         # sort chronologically
         annot.data.sort_values(
@@ -438,9 +463,11 @@ def run():
                                                   )
                 # run classification model
                 scores, seg_times_sec = classify_spectro_segments(spectro, model, spec_config, args)
+                #plt.plot(seg_times_sec, scores[:, 1])
 
                 # Smooth detection function by applying running mean
                 scores = compute_avg_score(scores[:, args.class_id], win_len=int(smooth_bins))
+
 
                 # define detections (start and stop times, metadata, etc)
                 detec = define_detections(scores, seg_times_sec, spec_config, audio_repr, file, args)

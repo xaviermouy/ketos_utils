@@ -475,6 +475,7 @@ def run():
                                                   )
                 # run classification model
                 scores, seg_times_sec = classify_spectro_segments(spectro, model, spec_config, args)
+                #plt.plot(seg_times_sec, scores[:,1])
 
                 # Smooth detection function by applying running mean
                 scores = compute_avg_score(scores[:, args.class_id], win_len=int(smooth_bins))
