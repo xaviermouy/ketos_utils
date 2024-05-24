@@ -38,13 +38,13 @@ def decimate(infile, outfile, channel, params):
     # load audio data
     audio_data.read(channel=channel-1, detrend=True)
     # bandpass filter
-    filter_type='bandpass'
-    cutoff_frequencies=params["bandpass_filter_fc"]
-    audio_data.filter(filter_type, cutoff_frequencies, order=params["filter_order"], verbose=True)
+    #filter_type='bandpass'
+    #cutoff_frequencies=params["bandpass_filter_fc"]
+    #audio_data.filter(filter_type, cutoff_frequencies, order=params["filter_order"], verbose=True)
     # decimate
     audio_data.decimate(params["sanpling_rate_hz"])
     ## detrend
-    #audio_data.detrend()
+    audio_data.detrend()
     # normalize
     #audio_data.normalize(method='std')
     audio_data.normalize(method='amplitude')
@@ -54,20 +54,29 @@ def decimate(infile, outfile, channel, params):
 
 ## ############################################################################
 params = dict()
-params[
-    "dataset_file_path"
-] = r"D:\MANUAL_ANNOTATIONS\Annotations_dataset_HK-NN-MW-HB_20230928T100147.nc"
-params["out_dir"] = r"C:\Users\xavie\OneDrive\Desktop\KETOS"
+params["dataset_file_path"] = r"G:\NOAA\2022_Minke_whale_detector\manual_annotations\discrete_datasets\UK-SAMS-WestScotland-201711-StantonBank_set2\Annotations_dataset_UK-SAMS-WestScotland-201711-StantonBank_set2 annotations.nc"
+params["out_dir"] = r"G:\NOAA\2022_Minke_whale_detector\ketos"
 params["group_timeframe"] = "6H"
 params["train_ratio"] = 0.75
-
 params["sanpling_rate_hz"] = 2000
-params["bandpass_filter_fc"]=[20,800]
-params["filter_type"] = "iir"
-params["filter_order"] = 8
+params["use_subclass_label"] = False # if True, startifies using [label_class + label_subclass]
 
-# if True, startifies using [label_class + label_subclass]
-params["use_subclass_label"] = False
+
+# params = dict()
+# params[
+#     "dataset_file_path"
+# ] = r"D:\MANUAL_ANNOTATIONS\Annotations_dataset_HK-NN-MW-HB_20230928T100147.nc"
+# params["out_dir"] = r"C:\Users\xavie\OneDrive\Desktop\KETOS"
+# params["group_timeframe"] = "6H"
+# params["train_ratio"] = 0.75
+#
+# params["sanpling_rate_hz"] = 2000
+# params["bandpass_filter_fc"]=[20,800]
+# params["filter_type"] = "iir"
+# params["filter_order"] = 8
+#
+# # if True, startifies using [label_class + label_subclass]
+# params["use_subclass_label"] = False
 
 
 # params = dict()

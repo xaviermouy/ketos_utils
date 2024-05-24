@@ -122,28 +122,18 @@ def write_to_database(db_file, dataset_name, selections, data_dir, params, db_mo
 
     # buffer before and after annot needed for the denoiser
     try:
-        file_buffer_sec = params["spec_cfg"]['denoiser'][0]['window_duration_sec']
+        file_buffer_sec = 2*params["spec_cfg"]['denoiser'][0]['window_duration_sec']
     except:
         file_buffer_sec =0
     pbar = tqdm(total=selections.shape[0],colour="green")
     idxx=0
-
-    #print('Warning just for testimg... needs to be removed')
-    #selections.drop(index=('PAM_20171202_010003_000_CH1.wav', 0),inplace=True)
-
-    for annot_index, annot_file in selections.groupby(level=0): # go through each file
-        file = annot_file.index[0][0]
-        time_first_annot = min(annot_file.start)
-        time_last_annot = max(annot_file.end)
+    for annot_index, annot_row in selections.iterrows():
         try:
             # load audio data
-            #file = annot_row.name[0]
+            file = annot_row.name[0]
             sound = Sound(os.path.join(data_dir, file))
-            # t1 = annot_row.start.min() - file_buffer_sec
-            # t2 = annot_row.end.max() + file_buffer_sec
-            t1 = time_first_annot - file_buffer_sec
-            t2 = time_last_annot + file_buffer_sec
-
+            t1 = annot_row.start.min() - file_buffer_sec
+            t2 = annot_row.end.max() + file_buffer_sec
             clip_start_sec = file_buffer_sec
             if t1 < 0:
                 clip_start_sec = file_buffer_sec + t1
@@ -178,38 +168,24 @@ def write_to_database(db_file, dataset_name, selections, data_dir, params, db_mo
                             dask_chunks=tuple(params["spec_cfg"]['denoiser'][0]['dask_chunks']),
                             inplace=True)
 
-            # readjust time axis of spectro due to t1
-            spectro._axis_times = spectro.axis_times + t1
-
-            for annot_index, annot_row in annot_file.droplevel(0).iterrows():
-
-                #time_idx = np.array(abs(spectro.axis_times - clip_start_sec)).argmin()
-                time_idx = np.array(abs(spectro.axis_times - annot_row.start)).argmin()
-                spectro_matrix = spectro.spectrogram[:, time_idx:time_idx + params['spec_cfg']['win_dur_bins']].T
-
-                # #for sanity check /debugging only
-                # plt.figure()
-                # plt.imshow(spectro_matrix.T)
-                # plt.gca().invert_yaxis()
-
-                if spectro_matrix.shape == (params['spec_cfg']['win_dur_bins'], params['spec_cfg']['win_bw_bins']):
-                    table_item['data'] = spectro_matrix
-                    table_item['filename'] = file
-                    table_item['id'] = int(idxx)
-                    table_item['label'] = int(annot_row['label'])
-                    idxx += 1
-                    # Insert a new record to table
-                    table_item.append()
-                    # writes to file
-                    table.flush()
-                else:
-                    print('Wrong spectrogram dimensions - data sample ignored.' + 'Spectro shape=' + str(
-                        spectro_matrix.shape) + ', expected shape= ' + str(
-                        (params['spec_cfg']['win_dur_bins'], params['spec_cfg']['win_bw_bins'])))
-                pbar.update(1)
+            time_idx = np.array(abs(spectro.axis_times - clip_start_sec)).argmin()
+            spectro_matrix = spectro.spectrogram[:, time_idx:time_idx + params['spec_cfg']['win_dur_bins']].T
+            if spectro_matrix.shape == (params['spec_cfg']['win_dur_bins'], params['spec_cfg']['win_bw_bins']):
+                table_item['data'] = spectro_matrix
+                table_item['filename'] = file
+                table_item['id'] = int(idxx)
+                table_item['label'] = int(annot_row['label'])
+                idxx+=1
+                # Insert a new record to table
+                table_item.append()
+                # writes to file
+                table.flush()
+            else:
+                print('Wrong spectrogram dimensions - data sample ignored.' + 'Spectro shape=' +str(spectro_matrix.shape) + ', expected shape= ' +str((params['spec_cfg']['win_dur_bins'], params['spec_cfg']['win_bw_bins'])))
         except:
             print('something went wrong...')
             continue
+        pbar.update(1)
     # close file
     pbar.close()
     h5file.close()
@@ -340,14 +316,16 @@ def run():
     # # windows must contain at least x% of the annotation:
     # params["aug_min_annot_ovlp"] = 1
 
-    ## MW ----------------------------------------------------------------------------
+    ## BC Fish ----------------------------------------------------------------------------
     params = dict()
     params["train_annot_file"] = r"G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\train.csv"
     params["test_annot_file"] = r"G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\test.csv"
     params["data_train_dir"] = r"G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\train_data"
     params["data_test_dir"] = r"G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\test_data"
-    params["out_dir"] = r"G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\databases\spectro-5s_fft-0.128_step-0.04_fimin-0_fmax-800_medianfilt-60s\CNN-222\run_3_MW-only"
-    params["spectro_config_file"] = r"G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\databases\spectro-5s_fft-0.128_step-0.04_fimin-0_fmax-800_medianfilt-60s\CNN-222\spec_config.json"
+    params[
+        "out_dir"] = r"G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\databases\spectro-5s_fft-0.128_step-0.04_fimin-0_fmax-800_medianfilt-60s"
+    params[
+        "spectro_config_file"] = r"G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\databases\spectro-5s_fft-0.128_step-0.04_fimin-0_fmax-800_medianfilt-60s\spec_config_custom.json"
 
     params["class_labels"] = []
     params["class_labels"].append(["NN", "HB", "HK", "HKP", "NNS", "HKPT"])  # class 0
@@ -356,40 +334,16 @@ def run():
     #params["max_samples_per_class_train"] = [70000, 71207]
     #params["max_samples_per_class_test"] = [70000, 16435]
 
-    params["max_samples_per_class_train"] = [10, 30000]
-    params["max_samples_per_class_test"] = [10, 7800]
+    params["max_samples_per_class_train"] = [2000, 2000]
+    params["max_samples_per_class_test"] = [2000, 2000]
 
     # segemnt duration in sec for the CNN:
     params["classif_window_sec"] = 5  # 0.4
     # step between consecutive windows in sec (0: no augmentation):
-    params["aug_win_step_sec"] = 2  # 0.1 #0.1
+    params["aug_win_step_sec"] = 1  # 0.1 #0.1
     # windows must contain at least x% of the annotation:
     params["aug_min_annot_ovlp"] = 1
 
-    # ## MW NOISE ONLY ----------------------------------------------------------------------------
-    # params = dict()
-    # params["train_annot_file"] = r"G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20240520T195302\train.csv"
-    # params["test_annot_file"] = r"G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20240520T195302\test.csv"
-    # params["data_train_dir"] = r"G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20240520T195302\train_data"
-    # params["data_test_dir"] = r"G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20240520T195302\test_data"
-    # params[
-    #     "out_dir"] = r"G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20240520T195302\databases\spectro-5s_fft-0.128_step-0.04_fimin-0_fmax-800_medianfilt-60s\CNN-222"
-    # params[
-    #     "spectro_config_file"] = r"G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20240520T195302\databases\spectro-5s_fft-0.128_step-0.04_fimin-0_fmax-800_medianfilt-60s\CNN-222\spec_config.json"
-    #
-    # params["class_labels"] = []
-    # params["class_labels"].append(["NN"])  # class 0
-    # #params["class_labels"].append(["MW"])  # class 1
-    #
-    # params["max_samples_per_class_train"] = [None, None]
-    # params["max_samples_per_class_test"] = [None, None]
-    #
-    # # segemnt duration in sec for the CNN:
-    # params["classif_window_sec"] = 5  # 0.4
-    # # step between consecutive windows in sec (0: no augmentation):
-    # params["aug_win_step_sec"] = 1  # 0.1 #0.1
-    # # windows must contain at least x% of the annotation:
-    # params["aug_min_annot_ovlp"] = 0.9
 
 
     ## ############################################################################

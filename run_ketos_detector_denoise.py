@@ -98,13 +98,13 @@ def set_args_parser():
     parser.add_argument(
         "--batch_size",
         type=int,
-        default=2048,  # 128
+        default=256,  # 128
         help="The number of segments to hold in memory at one time",
     )
     parser.add_argument(
         "--step_sec",
         type=float,
-        default=None,
+        default=0.05,
         help="Step size (in seconds) used for the sliding window",
     )
 
@@ -332,6 +332,8 @@ def define_detections(scores, seg_times_sec, spec_config, audio_repr, file, args
         detec_end_times_sec = [seg_times_sec[i] for i in end_indices]
         detec_end_times_sec = [i + audio_repr[0]['spectrogram']['duration'] for i in detec_end_times_sec]
         detec_scores = [np.median(scores[i:j + 1]) for i, j in zip(start_indices, end_indices)]
+        #detec_scores = [np.max(scores[i:j + 1]) for i, j in zip(start_indices, end_indices)]
+        #detec_scores = [np.mean(scores[i:j + 1]) for i, j in zip(start_indices, end_indices)]
     else:
         detec_start_times_sec = []
         detec_end_times_sec = []
