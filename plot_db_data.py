@@ -22,6 +22,7 @@ db_file = r'G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\data
 
 db_file = r'G:\NOAA\2022_Minke_whale_detector\ketos\dataset_20221214T163342\databases\spectro-5s_fft-0.128_step-0.04_fimin-0_fmax-800_medianfilt-60s\CNN-222_with_more_noise_and_more_MW\database.h5'
 
+db_file =r'G:\NOAA\2022_BC_fish_detector\ketos\dataset_20230206T120453\databases\spectro-0.2s_fft-0.064_step-0.01_fmin-0_fmax-1200_no-norm_denoised_fulldataset\database.h5'
 db = dbi.open_file(db_file, "r")
 train_data = dbi.open_table(db, "/train/data")
 val_data = dbi.open_table(db, "/test/data")
